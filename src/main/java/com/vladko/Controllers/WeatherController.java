@@ -16,7 +16,11 @@ public class WeatherController {
     @GetMapping("/getWeatherInCity")
     public String Weather (@RequestParam String city, Model model) throws IOException {
         WeatherApiResponseDTO weatherApiResponseDTO = weatherApiService.GetWeather(city);
-        model.addAttribute("weather", weatherApiResponseDTO.toString());
+        model.addAttribute("weather", weatherApiResponseDTO);
         return "weather/weather";
+    }
+    @GetMapping("/")
+    public String showMainPage(){
+        return "weather/search";
     }
 }

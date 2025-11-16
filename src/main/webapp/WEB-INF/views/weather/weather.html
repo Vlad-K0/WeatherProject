@@ -1,10 +1,11 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru">
 <head>
     <meta charset="UTF-8">
     <title>Hello</title>
 </head>
 <body>
-<p th:text="${weather}"></p>
+<p>Город: <span th:text="${weather.location.name}"></span></p>
+<p>Температура: <span th:text="${weather.current.temp_c}"></span> °C</p>
 </body>
 </html>
