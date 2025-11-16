@@ -39,3 +39,7 @@ build/
 
 ### Mac OS ###
 .DS_Store
+/src/main/resources/application.yml
+/src/main/resources/hibernate.cfg.xml
+/src/main/java/com/vladko/DAO/HibernateRunner.java
+/src/main/resources/weatherApi.yml
