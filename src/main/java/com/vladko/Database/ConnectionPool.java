@@ -40,6 +40,12 @@ public class ConnectionPool implements DataSource {
         this.databaseUsername = databaseUsername;
         this.databaseUrl = databaseUrl;
 
+        try {
+            Class.forName("org.postgresql.Driver");
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException("PostgreSQL Driver not found", e);
+        }
+
         initConnectionPool();
     }
 

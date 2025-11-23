@@ -4,12 +4,11 @@ import com.vladko.Database.ConnectionPool;
 import com.vladko.Utils.PropertyParsers.YamlPropertySourceFactory;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
+import org.flywaydb.core.Flyway;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Profile;
-import org.springframework.context.annotation.PropertySource;
+import org.springframework.context.annotation.*;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
+import org.springframework.orm.hibernate5.LocalSessionFactoryBean;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
 
@@ -65,7 +64,7 @@ public class DatabaseConfig {
         HikariConfig config = new HikariConfig();
 
         config.setDriverClassName(databaseDriver);
-        config.setJdbcUrl(databaseUrl); // Hikari использует setJdbcUrl
+        config.setJdbcUrl(databaseUrl);
         config.setUsername(databaseUsername);
         config.setPassword(databasePassword);
 
@@ -74,11 +73,35 @@ public class DatabaseConfig {
         return new HikariDataSource(config);
     }
 
+    @Bean(initMethod = "migrate")
+    public Flyway flyway(DataSource dataSource) {
+        return Flyway.configure()
+                .dataSource(dataSource)
+                .locations("classpath:db/migration")
+                .schemas("public")
+                .baselineOnMigrate(true)
+                .load();
+
+    }
     @Bean
+    public LocalSessionFactoryBean sessionFactory(DataSource dataSource) {
+        LocalSessionFactoryBean sessionFactory = new LocalSessionFactoryBean();
+        sessionFactory.setDataSource(dataSource);
+        sessionFactory.setPackagesToScan("com.vladko.Entity");
+
+        Properties hibernateProperties = new Properties();
+        hibernateProperties.put("hibernate.hbm2ddl.auto", "validate");
+        sessionFactory.setHibernateProperties(hibernateProperties);
+
+        return sessionFactory;
+    }
+
+    @Bean
+    @DependsOn("flyway")
     public LocalContainerEntityManagerFactoryBean entityManagerFactory(DataSource dataSource) {
         LocalContainerEntityManagerFactoryBean entityManagerFactory = new LocalContainerEntityManagerFactoryBean();
         entityManagerFactory.setDataSource(dataSource);
-        entityManagerFactory.setPackagesToScan("com.vladko.entity");
+        entityManagerFactory.setPackagesToScan("com.vladko.Entity");
         entityManagerFactory.setJpaVendorAdapter(new HibernateJpaVendorAdapter());
         entityManagerFactory.setJpaProperties(getHibernateProperties());
         return entityManagerFactory;
