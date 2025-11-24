@@ -15,12 +15,14 @@ public class Locations {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
+    @Column(length = 50, nullable = false,  unique = true)
     private String name;
 
     @ManyToOne
     @JoinColumn(name = "user_id")
     private Users user;
 
+    @Column(length = 50, nullable = false)
     private BigDecimal latitude;
 
     private BigDecimal longitude;

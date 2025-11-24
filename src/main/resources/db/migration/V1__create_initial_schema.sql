@@ -1,5 +1,3 @@
--- Полный и исправленный код для файла V1__create-user-table.sql
-
 DROP TABLE IF EXISTS Sessions;
 DROP TABLE IF EXISTS Locations;
 DROP TABLE IF EXISTS Users;
@@ -18,7 +16,7 @@ CREATE TABLE Locations (
     longitude DECIMAL(9, 6) NOT NULL,
 
     CONSTRAINT fk_locations_user
-        FOREIGN KEY(user_id) -- !!! ИСПРАВЛЕНО НА user_id !!!
+        FOREIGN KEY(user_id)
         REFERENCES Users(id)
         ON DELETE CASCADE,
 
@@ -30,7 +28,7 @@ CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 CREATE TABLE Sessions (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     user_id INT NOT NULL,
-    expires_at TIMESTAMP WITH TIME ZONE NOT NULL,
+    expires_at TIMESTAMP NOT NULL,
 
     CONSTRAINT fk_sessions_user
         FOREIGN KEY(user_id)

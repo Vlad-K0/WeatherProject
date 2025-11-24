@@ -1,6 +1,5 @@
 package com.vladko.Entity;
 
-
 import lombok.*;
 
 import javax.persistence.Entity;
@@ -12,8 +11,9 @@ import javax.persistence.Id;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 @Entity(name = "users")
-public class Users {
+public class Users implements BaseEntity<Integer> {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;

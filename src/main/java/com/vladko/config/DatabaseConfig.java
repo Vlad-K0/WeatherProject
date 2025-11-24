@@ -51,8 +51,7 @@ public class DatabaseConfig {
                     connectionPoolSize,
                     databasePassword,
                     databaseUsername,
-                    databaseUrl
-            );
+                    databaseUrl);
         } catch (SQLException e) {
             throw new RuntimeException("Failed to initialize ConnectionPool during configuration.", e);
         }
@@ -83,6 +82,7 @@ public class DatabaseConfig {
                 .load();
 
     }
+
     @Bean
     public LocalSessionFactoryBean sessionFactory(DataSource dataSource) {
         LocalSessionFactoryBean sessionFactory = new LocalSessionFactoryBean();

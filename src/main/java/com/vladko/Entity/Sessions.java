@@ -13,11 +13,13 @@ import java.util.UUID;
 @Entity(name = "sessions")
 public class Sessions {
     @Id
+    @org.hibernate.annotations.Type(type = "org.hibernate.type.PostgresUUIDType")
     private UUID id;
 
     @ManyToOne
     @JoinColumn(name = "user_id")
     private Users user;
 
+    @Column(name = "expires_at")
     private Instant expiresAt;
 }
