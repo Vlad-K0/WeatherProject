@@ -1,7 +1,7 @@
 package com.vladko.Repositories;
 
 import com.vladko.Entity.BaseEntity;
-import com.vladko.Entity.User;
+
 import lombok.Cleanup;
 import lombok.RequiredArgsConstructor;
 import org.hibernate.Session;
@@ -22,7 +22,9 @@ public abstract class BaseRepository<K extends Serializable, E extends BaseEntit
     public E save(E entity) {
         @Cleanup
         Session session = sessionFactory.openSession();
+        session.beginTransaction();
         session.save(entity);
+        session.getTransaction().commit();
         return entity;
     }
 
@@ -30,15 +32,21 @@ public abstract class BaseRepository<K extends Serializable, E extends BaseEntit
     public void delete(K id) {
         @Cleanup
         Session session = sessionFactory.openSession();
-        session.delete(session.get(User.class, id));
-        session.flush();
+        session.beginTransaction();
+        E entity = session.get(entityClass, id);
+        if (entity != null) {
+            session.delete(entity);
+        }
+        session.getTransaction().commit();
     }
 
     @Override
     public void update(E entity) {
         @Cleanup
         Session session = sessionFactory.openSession();
+        session.beginTransaction();
         session.update(entity);
+        session.getTransaction().commit();
     }
 
     @Override

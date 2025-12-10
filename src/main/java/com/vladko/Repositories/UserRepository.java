@@ -40,29 +40,16 @@ public class UserRepository extends BaseRepository<Integer, User> {
     public Optional<String> getPasswordByLogin(String username) {
         @Cleanup
         Session session = sessionFactory.openSession();
-//        return session.createQuery(GET_HASHED_PASSWORD_HQL, String.class)
-//                .setParameter("login", username)
-//                .uniqueResultOptional();
-        return Optional.ofNullable(
-                new JPAQuery<User>(session)
-                        .select(user.password)
-                        .from(user)
-                        .where(user.login.eq(username))
-                        .fetchOne()
-        );
+        return session.createQuery(GET_HASHED_PASSWORD_HQL, String.class)
+                .setParameter("login", username)
+                .uniqueResultOptional();
     }
 
     public Optional<User> findByUsername(String username) {
         @Cleanup
         Session session = sessionFactory.openSession();
-//        CriteriaQuery<User> criteria = session.getCriteriaBuilder().createQuery(User.class).where();
-//        criteria.from(User.class);
-//        return Optional.of(new User());
-        return Optional.ofNullable(new JPAQuery<User>(session)
-                .select(user)
-                .from(user)
-                .where(user.login.eq(username))
-                .fetch().get(0));
-
+        return session.createQuery(GET_USER_BY_NAME_HQL, User.class)
+                .setParameter("login", username)
+                .uniqueResultOptional();
     }
 }

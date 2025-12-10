@@ -11,8 +11,8 @@ import java.util.UUID;
 
 @Component
 public class SessionRepository extends BaseRepository<UUID, Session> {
-    public SessionRepository(Class<Session> entityClass, SessionFactory sessionFactory) {
-        super(entityClass, sessionFactory);
+    public SessionRepository(SessionFactory sessionFactory) {
+        super(Session.class, sessionFactory);
     }
 
     public void deleteExpiredSessions() {

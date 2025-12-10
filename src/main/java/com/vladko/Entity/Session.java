@@ -6,6 +6,8 @@ import javax.persistence.*;
 import java.time.Instant;
 import java.util.UUID;
 
+import org.hibernate.annotations.GenericGenerator;
+
 @Getter
 @Setter
 @NoArgsConstructor
@@ -14,7 +16,10 @@ import java.util.UUID;
 @Entity(name = "sessions")
 public class Session implements BaseEntity<UUID> {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(generator = "UUID")
+    @GenericGenerator(name = "UUID", strategy = "org.hibernate.id.UUIDGenerator")
+    @Column(columnDefinition = "uuid")
+    @org.hibernate.annotations.Type(type = "org.hibernate.type.PostgresUUIDType")
     private UUID id;
 
     @ManyToOne
