@@ -13,14 +13,17 @@ import java.io.IOException;
 @Controller
 public class WeatherController {
     private final WeatherApiService weatherApiService = new WeatherApiService();
+
     @GetMapping("/getWeatherInCity")
-    public String Weather (@RequestParam String city, Model model) throws IOException {
+    public String Weather(@RequestParam String city, Model model) throws IOException {
         WeatherApiResponseDTO weatherApiResponseDTO = weatherApiService.GetWeather(city);
         model.addAttribute("weather", weatherApiResponseDTO);
         return "weather/weather";
     }
+
     @GetMapping("/")
-    public String showMainPage(){
+    public String showMainPage() {
         return "weather/search";
     }
+
 }

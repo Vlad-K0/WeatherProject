@@ -1,9 +1,17 @@
 package com.vladko.Service;
 
-import com.vladko.Entity.Users;
+import com.vladko.DTO.UserDTO;
+import com.vladko.Entity.User;
+import com.vladko.Exceptions.AuthException;
+import com.vladko.Exceptions.NotFoundPassword;
 import com.vladko.Repositories.UserRepository;
-import com.vladko.DTO.RegisterUserDTO;
+import com.vladko.DTO.AuthRequestDTO;
+import com.vladko.Utils.Crypt.CryptoUtils;
+import org.hibernate.SessionFactory;
+import org.springframework.orm.hibernate5.LocalSessionFactoryBean;
 import org.springframework.stereotype.Component;
+
+import javax.naming.AuthenticationException;
 
 @Component
 public class UserService {
@@ -13,13 +21,40 @@ public class UserService {
         this.userRepository = userRepository;
     }
 
-    public void registerUser(RegisterUserDTO userDTO) {
-        if (userDTO.getUsername().isEmpty() || userDTO.getPassword().isEmpty()) {
+
+    public UserDTO findByUsername(String username) {
+        userRepository.findByUsername(username);
+        return new UserDTO();
+    }
+
+    public void registerUser(AuthRequestDTO registerUserDTO) {
+        if (registerUserDTO.getUsername().isEmpty() || registerUserDTO.getPassword().isEmpty()) {
+            throw new IllegalArgumentException("Login or password is empty");
+        } // сделать глубокую проверку через класс валидации
+
+        String hashedPassword = CryptoUtils.encryptPassword(registerUserDTO.getPassword());
+
+        User user = User.builder()
+                .login(registerUserDTO.getUsername())
+                .password(hashedPassword)
+                .build();
+
+        userRepository.save(user);
+    }
+
+    public UserDTO loginUser(AuthRequestDTO loginUserDTO) {
+        if (loginUserDTO.getUsername().isEmpty() || loginUserDTO.getPassword().isEmpty()) {
             throw new IllegalArgumentException("Login or password is empty");
         }
-        Users user = Users.builder()
-                .login(userDTO.getUsername())
-                .password(userDTO.getPassword()).build();
-        userRepository.save(user);
+        if (!isPasswordValid(loginUserDTO)) {
+            throw new AuthException("Invalid login or password");
+        }
+        return new UserDTO();
+    }
+
+    public boolean isPasswordValid(AuthRequestDTO loginUserDTO) {
+        return userRepository.getPasswordByLogin(loginUserDTO.getUsername())
+                .map(dbHash -> CryptoUtils.checkPassword(loginUserDTO.getPassword(), dbHash))
+                .orElse(false);
     }
 }

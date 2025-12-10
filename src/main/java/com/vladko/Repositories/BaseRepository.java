@@ -1,14 +1,12 @@
 package com.vladko.Repositories;
 
 import com.vladko.Entity.BaseEntity;
-import com.vladko.Entity.Users;
+import com.vladko.Entity.User;
 import lombok.Cleanup;
 import lombok.RequiredArgsConstructor;
-import org.hibernate.Criteria;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 
-import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import java.io.Serializable;
 import java.util.List;
@@ -18,7 +16,7 @@ import java.util.Optional;
 public abstract class BaseRepository<K extends Serializable, E extends BaseEntity<K>> implements Repository<K, E> {
 
     private final Class<E> entityClass;
-    private final SessionFactory sessionFactory;
+    protected final SessionFactory sessionFactory;
 
     @Override
     public E save(E entity) {
@@ -32,7 +30,7 @@ public abstract class BaseRepository<K extends Serializable, E extends BaseEntit
     public void delete(K id) {
         @Cleanup
         Session session = sessionFactory.openSession();
-        session.delete(session.get(Users.class, id));
+        session.delete(session.get(User.class, id));
         session.flush();
     }
 

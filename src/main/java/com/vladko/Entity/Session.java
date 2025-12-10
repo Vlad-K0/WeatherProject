@@ -10,16 +10,18 @@ import java.util.UUID;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 @Entity(name = "sessions")
-public class Sessions {
+public class Session implements BaseEntity<UUID> {
     @Id
-    @org.hibernate.annotations.Type(type = "org.hibernate.type.PostgresUUIDType")
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private UUID id;
 
     @ManyToOne
     @JoinColumn(name = "user_id")
-    private Users user;
+    private User user;
 
     @Column(name = "expires_at")
     private Instant expiresAt;
+
 }

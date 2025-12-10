@@ -4,10 +4,13 @@ package com.vladko.Service;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vladko.DTO.WeatherApiResponseDTO;
+import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import java.io.IOException;
 
+
+@Service
 public class WeatherApiService {
 
     public WeatherApiResponseDTO GetWeather(String city) throws IOException {
