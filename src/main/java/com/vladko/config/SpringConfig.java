@@ -58,6 +58,6 @@ public class SpringConfig implements WebMvcConfigurer {
     public void addInterceptors(InterceptorRegistry registry) {
         registry.addInterceptor(authenticationInterceptor)
                 .addPathPatterns("/**")
-                .excludePathPatterns("/auth/**", "/api/auth/**");
+                .excludePathPatterns("/auth/**", "/api/**");
     }
 }
