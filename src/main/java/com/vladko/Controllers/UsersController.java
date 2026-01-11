@@ -1,22 +1,28 @@
 package com.vladko.Controllers;
 
 import com.vladko.DTO.AuthRequestDTO;
+import com.vladko.DTO.UserDTO;
 import com.vladko.Exceptions.IncorrectPasswordException;
+import com.vladko.Service.SessionService;
 import com.vladko.Service.UserService;
+import com.vladko.Utils.CookieUtils;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.net.http.HttpRequest;
+import java.util.UUID;
 
 @Controller
 @RequestMapping("/auth")
 public class UsersController {
     private final UserService userService;
+    private final SessionService sessionService;
 
-    public UsersController(UserService userService) {
+    public UsersController(UserService userService, SessionService sessionService) {
         this.userService = userService;
+        this.sessionService = sessionService;
     }
 
     @GetMapping("register")
@@ -44,10 +50,21 @@ public class UsersController {
     @PostMapping("login")
     public String loginUser(@ModelAttribute("user") AuthRequestDTO authRequestDTO, HttpServletResponse response) {
         try {
-            userService.loginUser(authRequestDTO);
+            UserDTO userDTO = userService.loginUser(authRequestDTO);
+            UUID sessionId = sessionService.createSession(userDTO);
+            CookieUtils.setSessionId(response, sessionId.toString());
         } catch (IllegalArgumentException | IncorrectPasswordException e) {
             return "authorization/sign-in-with-errors";
         }
         return "redirect:/";
+    }
+
+    @PostMapping("logout")
+    public String logoutUser(HttpServletRequest request, HttpServletResponse response) {
+        String currentUUID = CookieUtils.getSessionIdFromCookie(request);
+        sessionService.deleteSessionsByID(currentUUID);
+        //не знаю как можно лучше сделать вводить новую такую же переменную не хочется
+        CookieUtils.deleteCookie(response, "SESSION_ID");
+        return "redirect:/auth/login";
     }
 }

@@ -19,10 +19,12 @@ import org.thymeleaf.spring5.view.ThymeleafViewResolver;
 @EnableWebMvc
 public class SpringConfig implements WebMvcConfigurer {
     private final ApplicationContext applicationContext;
+    private final AuthenticationInterceptor authenticationInterceptor;
 
     @Autowired
-    public SpringConfig(ApplicationContext applicationContext) {
+    public SpringConfig(ApplicationContext applicationContext, AuthenticationInterceptor authenticationInterceptor) {
         this.applicationContext = applicationContext;
+        this.authenticationInterceptor = authenticationInterceptor;
     }
 
     @Bean
@@ -52,7 +54,7 @@ public class SpringConfig implements WebMvcConfigurer {
 
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
-        registry.addInterceptor(new AuthenticationInterceptor())
+        registry.addInterceptor(authenticationInterceptor)
                 .addPathPatterns("/**")
                 .excludePathPatterns("/login", "/register");
     }
