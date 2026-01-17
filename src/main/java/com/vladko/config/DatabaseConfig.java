@@ -51,15 +51,14 @@ public class DatabaseConfig {
                     connectionPoolSize,
                     databasePassword,
                     databaseUsername,
-                    databaseUrl
-            );
+                    databaseUrl);
         } catch (SQLException e) {
             throw new RuntimeException("Failed to initialize ConnectionPool during configuration.", e);
         }
     }
 
     @Bean
-    @Profile("hikari-cp")
+    @Profile({ "hikari-cp", "default" })
     public DataSource hikariDataSource() {
         HikariConfig config = new HikariConfig();
 
@@ -83,6 +82,7 @@ public class DatabaseConfig {
                 .load();
 
     }
+
     @Bean
     public LocalSessionFactoryBean sessionFactory(DataSource dataSource) {
         LocalSessionFactoryBean sessionFactory = new LocalSessionFactoryBean();
@@ -109,7 +109,7 @@ public class DatabaseConfig {
 
     private Properties getHibernateProperties() {
         Properties properties = new Properties();
-        properties.setProperty("hibernate.dialect", hibernateDialect);
+        properties.setProperty("hibernate.dialect", "org.hibernate.dialect.PostgreSQL95Dialect");
         properties.setProperty("hibernate.show_sql", hibernateShowSql);
         properties.setProperty("hibernate.hbm2ddl.auto", hibernateHbm2DdlAuto);
         return properties;
