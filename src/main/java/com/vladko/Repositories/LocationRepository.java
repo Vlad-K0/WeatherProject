@@ -1,31 +1,29 @@
 package com.vladko.Repositories;
 
+
 import com.querydsl.jpa.impl.JPAQuery;
-import com.vladko.Entity.Locations;
-import com.vladko.Entity.User;
-import lombok.Cleanup;
+import com.vladko.Entity.Location;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
-import org.springframework.stereotype.Repository;
+import org.springframework.stereotype.Component;
 
 import java.util.List;
 
 import static com.vladko.Entity.QLocations.locations;
 
-@Repository
-public class LocationRepository extends BaseRepository<Integer, Locations> {
-
+@Component
+public class LocationRepository extends BaseRepository<Integer, Location> {
     public LocationRepository(SessionFactory sessionFactory) {
-        super(Locations.class, sessionFactory);
+        super(Location.class, sessionFactory);
     }
 
-    public List<Locations> findByUser(User user) {
-        @Cleanup
-        Session session = sessionFactory.openSession();
-        return new JPAQuery<Locations>(session)
+
+    public List<Location> getLocationsByUserName(String username) {
+        Session session = sessionFactory.getCurrentSession();
+        return new JPAQuery<Session>(session)
                 .select(locations)
                 .from(locations)
-                .where(locations.user.eq(user))
-                .fetch();
+                .where(locations.user.login.eq(username)).fetch();
+
     }
 }

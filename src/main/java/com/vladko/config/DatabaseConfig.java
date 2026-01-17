@@ -1,19 +1,17 @@
 package com.vladko.config;
 
-import com.vladko.Database.ConnectionPool;
 import com.vladko.Utils.PropertyParsers.YamlPropertySourceFactory;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 import org.flywaydb.core.Flyway;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.*;
-import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import org.springframework.orm.hibernate5.LocalSessionFactoryBean;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
+import org.springframework.web.client.RestTemplate;
 
 import javax.sql.DataSource;
-import java.sql.SQLException;
 import java.util.Properties;
 
 @Configuration
@@ -43,22 +41,8 @@ public class DatabaseConfig {
     @Value("${connectionPool.size}")
     private int connectionPoolSize;
 
-    @Bean
-    @Profile("custom-cp")
-    public DataSource dataSource() {
-        try {
-            return new ConnectionPool(
-                    connectionPoolSize,
-                    databasePassword,
-                    databaseUsername,
-                    databaseUrl);
-        } catch (SQLException e) {
-            throw new RuntimeException("Failed to initialize ConnectionPool during configuration.", e);
-        }
-    }
 
     @Bean
-    @Profile({ "hikari-cp", "default" })
     public DataSource hikariDataSource() {
         HikariConfig config = new HikariConfig();
 
@@ -105,6 +89,11 @@ public class DatabaseConfig {
         entityManagerFactory.setJpaVendorAdapter(new HibernateJpaVendorAdapter());
         entityManagerFactory.setJpaProperties(getHibernateProperties());
         return entityManagerFactory;
+    }
+
+    @Bean
+    public RestTemplate restTemplate() {
+        return new RestTemplate();
     }
 
     private Properties getHibernateProperties() {

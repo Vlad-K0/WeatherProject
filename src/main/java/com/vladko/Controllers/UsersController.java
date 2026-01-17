@@ -1,18 +1,17 @@
 package com.vladko.Controllers;
 
 import com.vladko.DTO.AuthRequestDTO;
-import com.vladko.Entity.User;
-import com.vladko.Exceptions.AuthException;
+import com.vladko.DTO.UserDTO;
+import com.vladko.Exceptions.IncorrectPasswordException;
 import com.vladko.Service.SessionService;
 import com.vladko.Service.UserService;
+import com.vladko.Utils.CookieUtils;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
-import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.util.Arrays;
 import java.util.UUID;
 
 @Controller
@@ -54,17 +53,10 @@ public class UsersController {
     @PostMapping("login")
     public String loginUser(@ModelAttribute("user") AuthRequestDTO authRequestDTO, HttpServletResponse response) {
         try {
-            User user = userService.loginUser(authRequestDTO);
-            UUID sessionId = sessionService.createSession(user);
-
-            Cookie sessionCookie = new Cookie(SESSION_COOKIE_NAME, sessionId.toString());
-            sessionCookie.setMaxAge(COOKIE_MAX_AGE);
-            sessionCookie.setHttpOnly(true);
-            sessionCookie.setPath("/");
-            response.addCookie(sessionCookie);
-
-            return "redirect:/";
-        } catch (IllegalArgumentException | AuthException e) {
+            UserDTO userDTO = userService.loginUser(authRequestDTO);
+            UUID sessionId = sessionService.createSession(userDTO);
+            CookieUtils.setSessionId(response, sessionId.toString());
+        } catch (IllegalArgumentException | IncorrectPasswordException e) {
             return "authorization/sign-in-with-errors";
         }
     }
@@ -89,6 +81,15 @@ public class UsersController {
                         response.addCookie(deleteCookie);
                     });
         }
+        return "redirect:/auth/login";
+    }
+
+    @PostMapping("logout")
+    public String logoutUser(HttpServletRequest request, HttpServletResponse response) {
+        String currentUUID = CookieUtils.getSessionIdFromCookie(request);
+        sessionService.deleteSessionsByID(currentUUID);
+        //не знаю как можно лучше сделать вводить новую такую же переменную не хочется
+        CookieUtils.deleteCookie(response, "SESSION_ID");
         return "redirect:/auth/login";
     }
 }

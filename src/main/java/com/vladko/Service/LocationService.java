@@ -1,15 +1,16 @@
 package com.vladko.Service;
 
-import com.vladko.Entity.Locations;
-import com.vladko.Entity.User;
+import com.vladko.DTO.LocationWeatherDTO;
+import com.vladko.DTO.LocationsWeatherDTO;
+import com.vladko.Entity.Location;
 import com.vladko.Repositories.LocationRepository;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 
-import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
+import java.util.stream.Collectors;
 
-@Service
+@Component
 public class LocationService {
     private final LocationRepository locationRepository;
 
@@ -17,24 +18,15 @@ public class LocationService {
         this.locationRepository = locationRepository;
     }
 
-    public Locations addLocation(User user, String name, BigDecimal latitude, BigDecimal longitude) {
-        Locations location = new Locations();
-        location.setUser(user);
-        location.setName(name);
-        location.setLatitude(latitude);
-        location.setLongitude(longitude);
-        return locationRepository.save(location);
+    public LocationsWeatherDTO getUserLocations(String username) {
+        ArrayList<Location> locations = (ArrayList<Location>) locationRepository.getLocationsByUserName(username);
+        List<LocationWeatherDTO> locationDTOs = locations.stream()
+                .map(location -> new LocationWeatherDTO(
+                        location.getName(),
+                        location.getLatitude(),
+                        location.getLongitude()
+                )).collect(Collectors.toList());
+        return new LocationsWeatherDTO(locationDTOs);
     }
 
-    public void removeLocation(Integer id) {
-        locationRepository.delete(id);
-    }
-
-    public List<Locations> getUserLocations(User user) {
-        return locationRepository.findByUser(user);
-    }
-
-    public Optional<Locations> findById(Integer id) {
-        return locationRepository.findById(id);
-    }
 }
