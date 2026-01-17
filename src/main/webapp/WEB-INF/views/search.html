@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Поиск городов - Weather Viewer</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <style>
+        :root {
+            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --success-gradient: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            --card-bg: #ffffff;
+            --bg-color: #f5f7fa;
+        }
+
+        body {
+            background: var(--bg-color);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            min-height: 100vh;
+        }
+
+        .navbar {
+            background: var(--primary-gradient);
+            padding: 1rem 0;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .navbar-brand {
+            color: white !important;
+            font-weight: 700;
+            font-size: 1.5rem;
+        }
+
+        .navbar-text {
+            color: rgba(255, 255, 255, 0.9);
+            margin-right: 20px;
+        }
+
+        .btn-logout {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 2px solid white;
+            border-radius: 10px;
+            padding: 8px 20px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .btn-logout:hover {
+            background: white;
+            color: #667eea;
+        }
+
+        .search-section {
+            background: var(--primary-gradient);
+            padding: 60px 0;
+            margin-bottom: 40px;
+        }
+
+        .search-card {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .search-card h2 {
+            color: #333;
+            margin-bottom: 30px;
+            font-weight: 700;
+        }
+
+        .search-input {
+            border: 2px solid #e0e0e0;
+            border-radius: 15px;
+            padding: 15px 20px;
+            font-size: 1.1rem;
+            transition: all 0.3s ease;
+        }
+
+        .search-input:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+        }
+
+        .btn-search {
+            background: var(--primary-gradient);
+            border: none;
+            border-radius: 15px;
+            padding: 15px 30px;
+            font-weight: 600;
+            color: white;
+            transition: all 0.3s ease;
+        }
+
+        .btn-search:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        .results-section {
+            padding: 0 0 60px 0;
+        }
+
+        .section-title {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 30px;
+        }
+
+        .result-card {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
+            transition: all 0.3s ease;
+            margin-bottom: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .result-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 5px;
+            background: var(--success-gradient);
+        }
+
+        .result-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
+        }
+
+        .location-name {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .location-details {
+            color: #666;
+            margin-bottom: 20px;
+        }
+
+        .location-coords {
+            color: #999;
+            font-size: 0.9rem;
+        }
+
+        .btn-add {
+            background: var(--success-gradient);
+            border: none;
+            border-radius: 10px;
+            padding: 12px 30px;
+            color: white;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .btn-add:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(56, 239, 125, 0.4);
+        }
+
+        .btn-back {
+            background: white;
+            border: 2px solid #667eea;
+            border-radius: 10px;
+            padding: 12px 30px;
+            color: #667eea;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-back:hover {
+            background: #667eea;
+            color: white;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+        }
+
+        .empty-state i {
+            font-size: 5rem;
+            color: #ccc;
+            margin-bottom: 20px;
+        }
+
+        .empty-state h3 {
+            color: #666;
+            margin-bottom: 10px;
+        }
+
+        .empty-state p {
+            color: #999;
+        }
+
+        @media (max-width: 768px) {
+            .search-section {
+                padding: 40px 0;
+            }
+
+            .search-card {
+                padding: 30px 20px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Навигация -->
+    <nav class="navbar navbar-expand-lg">
+        <div class="container">
+            <a class="navbar-brand" href="/">
+                <i class="bi bi-cloud-sun me-2"></i>Weather Viewer
+            </a>
+            <div class="d-flex align-items-center">
+                <span class="navbar-text">
+                    <i class="bi bi-person-circle me-2"></i>
+                    <span th:text="${username}">User</span>
+                </span>
+                <form th:action="@{/auth/logout}" method="post" class="d-inline">
+                    <button type="submit" class="btn btn-logout">
+                        <i class="bi bi-box-arrow-right me-2"></i>Выйти
+                    </button>
+                </form>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Поиск -->
+    <section class="search-section">
+        <div class="container">
+            <div class="search-card">
+                <h2 class="text-center">
+                    <i class="bi bi-search me-2"></i>Найти город
+                </h2>
+                <form th:action="@{/search}" method="get">
+                    <div class="input-group">
+                        <input type="text" class="form-control search-input" name="query" th:value="${query}"
+                            placeholder="Введите название города..." required>
+                        <button class="btn btn-search" type="submit">
+                            <i class="bi bi-search me-2"></i>Поиск
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <!-- Результаты поиска -->
+    <section class="results-section">
+        <div class="container">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2 class="section-title mb-0">
+                    <i class="bi bi-list-ul me-2"></i>Результаты поиска
+                </h2>
+                <a th:href="@{/}" class="btn-back">
+                    <i class="bi bi-arrow-left me-2"></i>На главную
+                </a>
+            </div>
+
+            <div th:if="${searchResults != null and !searchResults.isEmpty()}">
+                <div class="result-card" th:each="location : ${searchResults}">
+                    <div class="row align-items-center">
+                        <div class="col-md-8">
+                            <div class="location-name" th:text="${location.name}">City Name</div>
+                            <div class="location-details"
+                                th:if="${location.region != null or location.country != null}">
+                                <i class="bi bi-geo me-1"></i>
+                                <span th:if="${location.region != null}" th:text="${location.region}"></span><span
+                                    th:if="${location.region != null and location.country != null}">, </span><span
+                                    th:if="${location.country != null}" th:text="${location.country}"></span>
+                            </div>
+                            <div class="location-coords">
+                                <i class="bi bi-geo-alt-fill me-1"></i>
+                                Координаты:
+                                <span th:text="${location.lat}">0.00</span>,
+                                <span th:text="${location.lon}">0.00</span>
+                            </div>
+                        </div>
+                        <div class="col-md-4 text-end">
+                            <form th:action="@{/locations/add}" method="post">
+                                <input type="hidden" name="name" th:value="${location.name}">
+                                <input type="hidden" name="region" th:value="${location.region}">
+                                <input type="hidden" name="country" th:value="${location.country}">
+                                <input type="hidden" name="lat" th:value="${location.lat}">
+                                <input type="hidden" name="lon" th:value="${location.lon}">
+                                <button type="submit" class="btn btn-add">
+                                    <i class="bi bi-plus-circle me-2"></i>Добавить
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div th:if="${searchResults == null or searchResults.isEmpty()}" class="empty-state">
+                <i class="bi bi-search"></i>
+                <h3>Ничего не найдено</h3>
+                <p>Попробуйте изменить запрос</p>
+            </div>
+        </div>
+    </section>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+
+</html>
