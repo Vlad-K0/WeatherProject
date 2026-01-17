@@ -38,7 +38,7 @@ public class WeatherController {
             HttpServletRequest request,
             Model model) throws IOException {
         User currentUser = (User) request.getAttribute("currentUser");
-        model.addAttribute("username", currentUser.getLogin());
+        model.addAttribute("username",  currentUser.getLogin());
 
         if (query != null && !query.trim().isEmpty()) {
             LocationsWeatherDTO searchResults = weatherApiService.searchLocations(query);
