@@ -1,6 +1,7 @@
 package com.vladko.Entity;
 
 import lombok.*;
+import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.*;
 import java.time.Instant;
@@ -14,7 +15,8 @@ import java.util.UUID;
 @Entity(name = "sessions")
 public class Session implements BaseEntity<UUID> {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(generator = "UUID")
+    @GenericGenerator(name = "UUID", strategy = "org.hibernate.id.UUIDGenerator")
     private UUID id;
 
     @ManyToOne

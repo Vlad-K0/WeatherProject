@@ -12,7 +12,6 @@ import java.time.temporal.ChronoUnit;
 import java.util.Optional;
 import java.util.UUID;
 
-
 @Component
 public class SessionService {
     private final SessionRepository sessionRepository;
@@ -25,6 +24,8 @@ public class SessionService {
 
     public UUID createSession(UserDTO user) {
         Session session = new Session();
+        session.setId(UUID.randomUUID()); // Устанавливаем UUID вручную
+
         Optional<User> userFind = userRepository.findByUsername(user.getLogin());
         userFind.ifPresent(session::setUser);
 
@@ -54,6 +55,5 @@ public class SessionService {
     public void deleteSessionsByID(String sessionID) {
         sessionRepository.delete(UUID.fromString(sessionID));
     }
-
 
 }

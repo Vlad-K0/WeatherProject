@@ -19,10 +19,16 @@ public class AuthenticationInterceptor implements HandlerInterceptor {
         this.sessionService = service;
     }
 
-
     @Override
-    public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
+    public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler)
+            throws Exception {
         String cookieString = CookieUtils.getSessionIdFromCookie(request);
+
+        if (cookieString == null) {
+            response.sendRedirect(request.getContextPath() + "/auth/login");
+            return false;
+        }
+
         Optional<Session> findSession = sessionService.findSessionByID(cookieString);
         if (findSession.isPresent()) {
             Session currentSession = findSession.get();
