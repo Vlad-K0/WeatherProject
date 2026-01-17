@@ -49,6 +49,8 @@ public class SpringConfig implements WebMvcConfigurer {
     public void configureViewResolvers(ViewResolverRegistry registry) {
         ThymeleafViewResolver resolver = new ThymeleafViewResolver();
         resolver.setTemplateEngine(templateEngine());
+        resolver.setCharacterEncoding("UTF-8");
+        resolver.setContentType("text/html; charset=UTF-8");
         registry.viewResolver(resolver);
     }
 
@@ -56,6 +58,6 @@ public class SpringConfig implements WebMvcConfigurer {
     public void addInterceptors(InterceptorRegistry registry) {
         registry.addInterceptor(authenticationInterceptor)
                 .addPathPatterns("/**")
-                .excludePathPatterns("/login", "/register");
+                .excludePathPatterns("/auth/**", "/api/auth/**");
     }
 }

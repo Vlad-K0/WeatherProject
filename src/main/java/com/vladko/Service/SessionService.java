@@ -12,8 +12,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.Optional;
 import java.util.UUID;
 
-
-@Component
+@Service
 public class SessionService {
     private final SessionRepository sessionRepository;
     private final UserRepository userRepository;

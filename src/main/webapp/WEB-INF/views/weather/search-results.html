@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Search Results</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; background: #f5f5f5; }
+        .header { display: flex; justify-content: space-between; align-items: center; padding: 10px 20px; background: #333; color: white; border-radius: 5px; margin-bottom: 20px; }
+        .header a { color: white; text-decoration: none; }
+        .results { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; }
+        .result-card { background: white; padding: 20px; border-radius: 5px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .result-card h3 { margin-top: 0; color: #333; }
+        .add-btn { background: #28a745; color: white; border: none; padding: 10px 20px; border-radius: 3px; cursor: pointer; }
+        .add-btn:hover { background: #218838; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Weather Viewer</h1>
+        <a th:href="@{/}">Home</a>
+    </div>
+    <p><a th:href="@{/}">Back</a></p>
+    <h2>Search: <span th:text="${query}">query</span></h2>
+    <div th:if="${results != null and #lists.size(results) > 0}" class="results">
+        <div class="result-card" th:each="location : ${results}">
+            <h3 th:text="${location.name}">Name</h3>
+            <p th:text="${location.region}">Region</p>
+            <p th:text="${location.country}">Country</p>
+            <p th:text="'Coords: ' + ${location.lat} + ', ' + ${location.lon}">Coords</p>
+            <form th:action="@{/locations}" method="POST">
+                <input type="hidden" name="name" th:value="${location.name}">
+                <input type="hidden" name="lat" th:value="${location.lat}">
+                <input type="hidden" name="lon" th:value="${location.lon}">
+                <button type="submit" class="add-btn">+ Add</button>
+            </form>
+        </div>
+    </div>
+    <p th:if="${results == null or #lists.size(results) == 0}">No results found.</p>
+</body>
+</html>

@@ -21,7 +21,6 @@ public class UserService {
         this.userRepository = userRepository;
     }
 
-
     public UserDTO findByUsername(String username) {
         userRepository.findByUsername(username);
         return new UserDTO();
@@ -42,14 +41,15 @@ public class UserService {
         userRepository.save(user);
     }
 
-    public UserDTO loginUser(AuthRequestDTO loginUserDTO) {
+    public User loginUser(AuthRequestDTO loginUserDTO) {
         if (loginUserDTO.getUsername().isEmpty() || loginUserDTO.getPassword().isEmpty()) {
             throw new IllegalArgumentException("Login or password is empty");
         }
         if (!isPasswordValid(loginUserDTO)) {
             throw new AuthException("Invalid login or password");
         }
-        return new UserDTO();
+        return userRepository.findByUsername(loginUserDTO.getUsername())
+                .orElseThrow(() -> new AuthException("User not found"));
     }
 
     public boolean isPasswordValid(AuthRequestDTO loginUserDTO) {

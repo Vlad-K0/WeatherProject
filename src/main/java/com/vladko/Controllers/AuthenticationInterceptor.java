@@ -6,12 +6,15 @@ import com.vladko.Utils.CookieUtils;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
 
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.util.Optional;
 
 @Component
 public class AuthenticationInterceptor implements HandlerInterceptor {
+    private static final String SESSION_COOKIE_NAME = "SESSION_ID";
+    public static final String CURRENT_USER_ATTR = "currentUser";
 
     private final SessionService sessionService;
 
@@ -33,4 +36,21 @@ public class AuthenticationInterceptor implements HandlerInterceptor {
         return false;
     }
 
+    private Optional<UUID> getSessionIdFromCookies(HttpServletRequest request) {
+        Cookie[] cookies = request.getCookies();
+        if (cookies == null) {
+            return Optional.empty();
+        }
+
+        return Arrays.stream(cookies)
+                .filter(c -> SESSION_COOKIE_NAME.equals(c.getName()))
+                .findFirst()
+                .flatMap(cookie -> {
+                    try {
+                        return Optional.of(UUID.fromString(cookie.getValue()));
+                    } catch (IllegalArgumentException e) {
+                        return Optional.empty();
+                    }
+                });
+    }
 }
