@@ -1,30 +1,86 @@
 package com.vladko.Service;
 
-
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.vladko.DTO.WeatherApiResponseDTO;
+import com.vladko.DTO.LocationWeatherDTO;
+import com.vladko.DTO.LocationsWeatherDTO;
+import com.vladko.Utils.PropertyParsers.YamlPropertySourceFactory;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import java.io.IOException;
 
-
 @Service
+@PropertySource(value = "classpath:application.yml", factory = YamlPropertySourceFactory.class)
 public class WeatherApiService {
 
-    public WeatherApiResponseDTO GetWeather(String city) throws IOException {
-        RestTemplate restTemplate = new RestTemplate();
-        String url = "http://api.weatherapi.com/v1/current.json?key=b1fe6dd623f94a799a4123107250911&q=" + city;
-        String jsonString = restTemplate.getForObject(url, String.class);
+    @Value("${weather-api.base-url}")
+    private String baseURL;
 
-        ObjectMapper objectMapper = new ObjectMapper();
-        objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+    @Value("${weather-api.key}")
+    private String apiKey;
 
+    private final RestTemplate restTemplate;
 
-        return objectMapper.readValue(jsonString, WeatherApiResponseDTO.class);
+    public WeatherApiService(RestTemplate restTemplate) {
+        this.restTemplate = restTemplate;
+    }
 
+    public LocationsWeatherDTO searchLocations(String cityName) throws IOException {
+        ObjectMapper mapper = new ObjectMapper();
 
+        String url = UriComponentsBuilder.fromHttpUrl(baseURL)
+                .path("/search.json")
+                .queryParam("key", apiKey)
+                .queryParam("q", cityName)
+                .toUriString();
+
+        try {
+            String locationsJson = restTemplate.getForObject(url, String.class);
+
+            if (locationsJson == null || locationsJson.isEmpty()) {
+                return new LocationsWeatherDTO(java.util.Collections.emptyList());
+            }
+
+            LocationWeatherDTO[] locationsArray = mapper.readValue(locationsJson, LocationWeatherDTO[].class);
+            LocationsWeatherDTO result = new LocationsWeatherDTO();
+            result.setLocations(java.util.Arrays.asList(locationsArray));
+
+            return result;
+        } catch (org.springframework.web.client.ResourceAccessException e) {
+            return new LocationsWeatherDTO(java.util.Collections.emptyList());
+        } catch (org.springframework.web.client.RestClientException e) {
+            return new LocationsWeatherDTO(java.util.Collections.emptyList());
+        }
+    }
+
+    public LocationWeatherDTO getWeatherByCoordinates(double lat, double lon) {
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+
+        String url = UriComponentsBuilder.fromHttpUrl(baseURL)
+                .path("/current.json")
+                .queryParam("key", apiKey)
+                .queryParam("q", lat + "," + lon)
+                .toUriString();
+        String locationJson = restTemplate.getForObject(url, String.class);
+
+        try {
+            JsonNode root = mapper.readTree(locationJson);
+            LocationWeatherDTO dto = new LocationWeatherDTO();
+            dto.setName(root.path("location").path("name").asText());
+            dto.setLat(new java.math.BigDecimal(root.path("location").path("lat").asDouble()));
+            dto.setLon(new java.math.BigDecimal(root.path("location").path("lon").asDouble()));
+            dto.setTemperature(root.path("current").path("temp_c").asDouble());
+            return dto;
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
     }
 
 }

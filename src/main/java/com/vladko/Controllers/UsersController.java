@@ -53,7 +53,7 @@ public class UsersController {
             UserDTO userDTO = userService.loginUser(authRequestDTO);
             UUID sessionId = sessionService.createSession(userDTO);
             CookieUtils.setSessionId(response, sessionId.toString());
-        } catch (IllegalArgumentException | IncorrectPasswordException e) {
+        } catch (IllegalArgumentException | IncorrectPasswordException | com.vladko.Exceptions.AuthException e) {
             return "authorization/sign-in-with-errors";
         }
         return "redirect:/";
@@ -63,7 +63,7 @@ public class UsersController {
     public String logoutUser(HttpServletRequest request, HttpServletResponse response) {
         String currentUUID = CookieUtils.getSessionIdFromCookie(request);
         sessionService.deleteSessionsByID(currentUUID);
-        //не знаю как можно лучше сделать вводить новую такую же переменную не хочется
+        // не знаю как можно лучше сделать вводить новую такую же переменную не хочется
         CookieUtils.deleteCookie(response, "SESSION_ID");
         return "redirect:/auth/login";
     }
