@@ -1,29 +1,52 @@
 package com.vladko.Controllers;
 
-
-import com.vladko.DTO.WeatherApiResponseDTO;
+import com.vladko.DTO.LocationsWeatherDTO;
+import com.vladko.Entity.User;
+import com.vladko.Service.LocationService;
 import com.vladko.Service.WeatherApiService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 
 @Controller
 public class WeatherController {
-    private final WeatherApiService weatherApiService = new WeatherApiService();
+    private final WeatherApiService weatherApiService;
+    private final LocationService locationService;
 
-    @GetMapping("/getWeatherInCity")
-    public String Weather(@RequestParam String city, Model model) throws IOException {
-        WeatherApiResponseDTO weatherApiResponseDTO = weatherApiService.GetWeather(city);
-        model.addAttribute("weather", weatherApiResponseDTO);
-        return "weather/weather";
+    public WeatherController(WeatherApiService weatherApiService, LocationService locationService) {
+        this.weatherApiService = weatherApiService;
+        this.locationService = locationService;
     }
 
     @GetMapping("/")
-    public String showMainPage() {
-        return "weather/search";
+    public String showMainPage(HttpServletRequest request, Model model) {
+        User currentUser = (User) request.getAttribute("currentUser");
+        if (currentUser != null) {
+            LocationsWeatherDTO userLocations = locationService.getUserLocations(currentUser.getLogin());
+            model.addAttribute("locations", userLocations.getLocations());
+            model.addAttribute("username", currentUser.getLogin());
+        }
+        return "index";
+    }
+
+    @GetMapping("/search")
+    public String searchCities(@RequestParam(required = false) String query,
+            HttpServletRequest request,
+            Model model) throws IOException {
+        User currentUser = (User) request.getAttribute("currentUser");
+        model.addAttribute("username", currentUser.getLogin());
+
+        if (query != null && !query.trim().isEmpty()) {
+            LocationsWeatherDTO searchResults = weatherApiService.searchLocations(query);
+            model.addAttribute("searchResults", searchResults.getLocations());
+            model.addAttribute("query", query);
+        }
+
+        return "search";
     }
 
 }
