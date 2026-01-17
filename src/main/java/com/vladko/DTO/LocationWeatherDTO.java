@@ -1,6 +1,6 @@
 package com.vladko.DTO;
 
-
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -10,8 +10,13 @@ import java.math.BigDecimal;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class LocationWeatherDTO {
-    String name;
-    BigDecimal lat;
-    BigDecimal lon;
+    private Integer id;
+    private String name;
+    private String region;
+    private String country;
+    private BigDecimal lat;
+    private BigDecimal lon;
+    private Double temperature;
 }
