@@ -40,7 +40,9 @@ public abstract class BaseRepository<K extends Serializable, E extends BaseEntit
     public void update(E entity) {
         @Cleanup
         Session session = sessionFactory.openSession();
+        session.beginTransaction();
         session.update(entity);
+        session.getTransaction().commit();
     }
 
     @Override

@@ -1,11 +1,71 @@
 <!DOCTYPE html>
-<html lang="en">
-<head><title>Поиск погоды</title></head>
+<html xmlns:th="http://www.thymeleaf.org" lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Weather Viewer</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; background: #f5f5f5; }
+        .header { display: flex; justify-content: space-between; align-items: center; padding: 10px 20px; background: #333; color: white; border-radius: 5px; margin-bottom: 20px; }
+        .header a { color: white; margin-left: 15px; text-decoration: none; }
+        .search-form { background: white; padding: 20px; border-radius: 5px; margin-bottom: 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .search-form input[type="text"] { padding: 10px; width: 300px; border: 1px solid #ddd; border-radius: 3px; }
+        .search-form button { padding: 10px 20px; background: #007bff; color: white; border: none; border-radius: 3px; cursor: pointer; }
+        .search-form button:hover { background: #0056b3; }
+        .locations { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; }
+        .location-card { background: white; padding: 20px; border-radius: 5px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .location-card h3 { margin-top: 0; color: #333; }
+        .temp { font-size: 2em; color: #007bff; }
+        .delete-btn { background: #dc3545; color: white; border: none; padding: 5px 10px; border-radius: 3px; cursor: pointer; margin-top: 10px; }
+        .delete-btn:hover { background: #c82333; }
+    </style>
+</head>
 <body>
-<form action="/getWeatherInCity" method="GET">
-    <label for="city_input">Введите город:</label>
-    <input type="text" id="city_input" name="city">
-    <button type="submit">Искать</button>
-</form>
+    <div class="header">
+        <h1>Weather Viewer</h1>
+        <div>
+            <span th:if="${username != null}" th:text="'Hello, ' + ${username} + '!'">Hello!</span>
+            <a th:if="${username != null}" th:href="@{/auth/logout}">Logout</a>
+            <a th:if="${username == null}" th:href="@{/auth/login}">Login</a>
+        </div>
+    </div>
+
+    <div class="search-form">
+        <h2>Search Location</h2>
+        <form th:action="@{/locations/search}" method="GET">
+            <input type="text" name="query" placeholder="Enter city name..." required>
+            <button type="submit">Search</button>
+        </form>
+    </div>
+
+    <div class="search-form">
+        <h2>Quick Weather</h2>
+        <form th:action="@{/getWeatherInCity}" method="GET">
+            <input type="text" name="city" placeholder="Enter city..." required>
+            <button type="submit">Show Weather</button>
+        </form>
+    </div>
+
+    <h2>My Saved Locations</h2>
+    <div th:if="${locations != null and #lists.size(locations) > 0}" class="locations">
+        <div class="location-card" th:each="item : ${locations}">
+            <h3 th:text="${item.location.name}">City</h3>
+            <div th:if="${item.weather != null}">
+                <p class="temp" th:text="${item.weather.current.temp_c} + ' C'">--C</p>
+                <p th:text="${item.weather.current.condition.text}">Condition</p>
+                <p th:text="'Humidity: ' + ${item.weather.current.humidity} + '%'">Humidity</p>
+                <p th:text="'Wind: ' + ${item.weather.current.wind_kph} + ' km/h'">Wind</p>
+            </div>
+            <div th:if="${item.weather == null}">
+                <p>Could not load weather</p>
+            </div>
+            <form th:action="@{/locations/delete}" method="POST" style="display:inline;">
+                <input type="hidden" name="locationId" th:value="${item.location.id}">
+                <button type="submit" class="delete-btn">Delete</button>
+            </form>
+        </div>
+    </div>
+    <p th:if="${locations == null or #lists.size(locations) == 0}" style="color: #666; font-style: italic;">
+        No saved locations yet. Use search to add!
+    </p>
 </body>
 </html>

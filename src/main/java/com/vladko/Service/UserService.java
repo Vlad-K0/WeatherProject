@@ -43,7 +43,7 @@ public class UserService {
         userRepository.save(user);
     }
 
-    public UserDTO loginUser(AuthRequestDTO loginUserDTO) {
+    public User loginUser(AuthRequestDTO loginUserDTO) {
         if (loginUserDTO.getUsername().isEmpty() || loginUserDTO.getPassword().isEmpty()) {
             throw new IllegalArgumentException("Login or password is empty");
         }

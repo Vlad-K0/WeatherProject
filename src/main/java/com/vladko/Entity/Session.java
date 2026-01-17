@@ -7,6 +7,8 @@ import javax.persistence.*;
 import java.time.Instant;
 import java.util.UUID;
 
+import org.hibernate.annotations.GenericGenerator;
+
 @Getter
 @Setter
 @NoArgsConstructor

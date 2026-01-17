@@ -17,6 +17,9 @@ import java.util.UUID;
 @Controller
 @RequestMapping("/auth")
 public class UsersController {
+    private static final String SESSION_COOKIE_NAME = "SESSION_ID";
+    private static final int COOKIE_MAX_AGE = 3600; // 1 hour
+
     private final UserService userService;
     private final SessionService sessionService;
 
@@ -42,7 +45,7 @@ public class UsersController {
         try {
             userService.registerUser(authRequestDTO);
         } catch (IllegalArgumentException e) {
-            return "";
+            return "authorization/sign-up-with-errors";
         }
         return "redirect:/auth/login";
     }
@@ -56,7 +59,29 @@ public class UsersController {
         } catch (IllegalArgumentException | IncorrectPasswordException | com.vladko.Exceptions.AuthException e) {
             return "authorization/sign-in-with-errors";
         }
-        return "redirect:/";
+    }
+
+    @GetMapping("logout")
+    public String logout(HttpServletRequest request, HttpServletResponse response) {
+        Cookie[] cookies = request.getCookies();
+        if (cookies != null) {
+            Arrays.stream(cookies)
+                    .filter(c -> SESSION_COOKIE_NAME.equals(c.getName()))
+                    .findFirst()
+                    .ifPresent(cookie -> {
+                        try {
+                            UUID sessionId = UUID.fromString(cookie.getValue());
+                            sessionService.deleteSession(sessionId);
+                        } catch (IllegalArgumentException ignored) {
+                        }
+
+                        Cookie deleteCookie = new Cookie(SESSION_COOKIE_NAME, "");
+                        deleteCookie.setMaxAge(0);
+                        deleteCookie.setPath("/");
+                        response.addCookie(deleteCookie);
+                    });
+        }
+        return "redirect:/auth/login";
     }
 
     @PostMapping("logout")

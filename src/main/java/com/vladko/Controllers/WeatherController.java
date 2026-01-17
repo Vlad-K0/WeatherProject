@@ -11,6 +11,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 @Controller
 public class WeatherController {
@@ -49,4 +51,21 @@ public class WeatherController {
         return "search";
     }
 
+    public static class LocationWeatherData {
+        private final Locations location;
+        private final WeatherApiResponseDTO weather;
+
+        public LocationWeatherData(Locations location, WeatherApiResponseDTO weather) {
+            this.location = location;
+            this.weather = weather;
+        }
+
+        public Locations getLocation() {
+            return location;
+        }
+
+        public WeatherApiResponseDTO getWeather() {
+            return weather;
+        }
+    }
 }

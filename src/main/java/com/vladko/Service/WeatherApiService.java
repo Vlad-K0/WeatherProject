@@ -18,6 +18,8 @@ import java.io.IOException;
 @Service
 @PropertySource(value = "classpath:application.yml", factory = YamlPropertySourceFactory.class)
 public class WeatherApiService {
+    private static final String API_KEY = "b1fe6dd623f94a799a4123107250911";
+    private static final String BASE_URL = "http://api.weatherapi.com/v1";
 
     @Value("${weather-api.base-url}")
     private String baseURL;
@@ -83,4 +85,14 @@ public class WeatherApiService {
         }
     }
 
+    public List<LocationSearchResultDTO> searchLocations(String query) {
+        try {
+            String url = BASE_URL + "/search.json?key=" + API_KEY + "&q=" + query;
+            String jsonString = restTemplate.getForObject(url, String.class);
+            return objectMapper.readValue(jsonString, new TypeReference<List<LocationSearchResultDTO>>() {
+            });
+        } catch (Exception e) {
+            return Collections.emptyList();
+        }
+    }
 }
