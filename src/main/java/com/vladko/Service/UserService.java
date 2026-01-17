@@ -3,15 +3,12 @@ package com.vladko.Service;
 import com.vladko.DTO.UserDTO;
 import com.vladko.Entity.User;
 import com.vladko.Exceptions.AuthException;
-import com.vladko.Exceptions.NotFoundPassword;
 import com.vladko.Repositories.UserRepository;
 import com.vladko.DTO.AuthRequestDTO;
 import com.vladko.Utils.Crypt.CryptoUtils;
-import org.hibernate.SessionFactory;
-import org.springframework.orm.hibernate5.LocalSessionFactoryBean;
 import org.springframework.stereotype.Component;
 
-import javax.naming.AuthenticationException;
+import java.util.Optional;
 
 @Component
 public class UserService {
@@ -21,9 +18,13 @@ public class UserService {
         this.userRepository = userRepository;
     }
 
-
     public UserDTO findByUsername(String username) {
-        userRepository.findByUsername(username);
+        Optional<User> findUser = userRepository.findByUsername(username);
+        if (findUser.isPresent()) {
+            UserDTO userDTO = new UserDTO();
+            userDTO.setLogin(findUser.get().getLogin());
+            return userDTO;
+        }
         return new UserDTO();
     }
 
@@ -49,7 +50,16 @@ public class UserService {
         if (!isPasswordValid(loginUserDTO)) {
             throw new AuthException("Invalid login or password");
         }
-        return new UserDTO();
+
+        // Получаем пользователя из базы и создаем DTO
+        Optional<User> user = userRepository.findByUsername(loginUserDTO.getUsername());
+        if (user.isPresent()) {
+            UserDTO userDTO = new UserDTO();
+            userDTO.setLogin(user.get().getLogin());
+            return userDTO;
+        }
+
+        throw new AuthException("User not found");
     }
 
     public boolean isPasswordValid(AuthRequestDTO loginUserDTO) {
